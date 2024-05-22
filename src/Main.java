@@ -1,3 +1,4 @@
+import java.sql.SQLOutput;
 import java.util.*;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -98,6 +99,12 @@ public class Main {
                 case 1:
                     registerNewOrderFromUserInput();
                     break;
+                case 2:
+                    updateOrderForAdmin();
+                    break;
+                case 3:
+                    searchOrderFromInput();
+                    break;
                 case 6:
                     registerDriver();
                     break;
@@ -112,6 +119,60 @@ public class Main {
             }
         }
     }
+
+    public static void searchOrderFromInput(){
+        System.out.println("Enter Order ID or Customer Name to search: ");
+        String criteria  = scanner.nextLine();
+        searchOrder(criteria);
+    }
+
+
+    public static void updateOrderForAdmin(){
+        System.out.println("Please enter order id to update: ");
+        Order foundOrder = searchOrder(scanner.nextLine());
+        if(foundOrder==null){
+            System.out.println("Order not found with the given information");
+            return;
+        }
+        System.out.println("  Update driver  ");
+        System.out.println("Current driver "+foundOrder.getDriver().getName());
+        Driver newDriver = selectDriver();
+        foundOrder.setDriver(newDriver);
+        System.out.println(foundOrder);
+    }
+
+
+    private static Order searchOrder(String criteria){
+
+        Order foundOrder = null;
+        for(int i = 0;i<orders.size();i++){
+            if(orders.get(i).getOrderID().equals(criteria)||orders.get(i).getCustomer().getName().equals(criteria)){
+                foundOrder = orders.get(i);
+            }
+        }
+
+        if(foundOrder == null){
+            return null;
+        }
+
+        System.out.println("OrderId: "+foundOrder.getOrderID());
+            System.out.println("Customer: "+foundOrder.getCustomer().getName());
+            System.out.println("   Products List   ");
+
+            //fix this
+            for(Map.Entry<Product,Integer>entry:foundOrder.getProducts().entrySet()){
+                System.out.println("Product: "+entry.getKey()+" quantity "+entry.getValue());
+            }
+            if(foundOrder.getAddressOrLockerNum().contains("Locker")){
+                System.out.println("Locker Location: "+foundOrder.getAddressOrLockerNum());
+            }else{
+                System.out.println("Customer Address: "+foundOrder.getAddressOrLockerNum());
+            }
+            System.out.println("Order Status: "+foundOrder.getStatus());
+            return foundOrder;
+    }
+
+
     private static Driver registerDriver(){
         System.out.println("Registering new driver");
         System.out.println("Enter driver name: ");
@@ -176,8 +237,9 @@ public class Main {
         Driver driver = selectDriver();
         HashMap<Product, Integer> products = selectProducts();
         System.out.print("Deliver to locker? (yes/no): ");
-        boolean deliverToLocker = scanner.nextLine().equalsIgnoreCase("yes");
         scanner.nextLine();
+        boolean deliverToLocker = scanner.nextLine().equalsIgnoreCase("yes");
+        System.out.println("DELIVERS TO LOCKER"+deliverToLocker);
         registerNewOrder(customer,driver,products,deliverToLocker);
     }
 
@@ -196,26 +258,16 @@ public class Main {
                 return;
             }
             deliveryAddress = "Locker at "+available.getAddress() + " #"+available.getNumber();
+            System.out.println("!!!!!!!!!"+deliveryAddress);
             available.setAvailable(false);
         }else{
             deliveryAddress = customer.getAddress();
         }
-        Order newOrder = new Order(orderId,products,deliveryAddress,"pending",driver,customer);
+        Order newOrder = new Order(orderId,products,deliveryAddress,"pending",driver,customer,deliveryAddress);
+
         System.out.println(newOrder);
+        orders.add(newOrder);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     private static Customer createCustomer(){
         System.out.println("Register New Customer");
@@ -234,9 +286,6 @@ public class Main {
     }
 
 
-
-
-
     public static Customer selectCustomer(){
         while(true){
             System.out.println("Select Customer:");
@@ -253,7 +302,6 @@ public class Main {
             }else{
                 System.out.println("Invalid customer , try again ");
             }
-
         }
     }
 
@@ -274,16 +322,7 @@ public class Main {
             }else{
                 System.out.println("Invalid driver number. Please try again.");
             }
-
         }
-
-
-
-
-
-
-
-
     }
 
     private static HashMap<Product,Integer>selectProducts(){
@@ -292,7 +331,6 @@ public class Main {
         for (int i = 0; i < products.size(); i++) {
             System.out.println((i + 1) + ". " + products.get(i).getName() + " (" + products.get(i).getCategory() + ")");
         }
-
         while(true){
             System.out.print("Enter product number (or 0 to finish): ");
             int productIndex = scanner.nextInt() - 1;
@@ -309,10 +347,6 @@ public class Main {
             }else{
                 System.out.println("Invalid product number. Please try again.");
             }
-
-
-
-
         }
         return productsSelected;
     }

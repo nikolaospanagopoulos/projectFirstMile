@@ -7,15 +7,17 @@ public class Order {
     private String status;
     private String addressOrLockerNum;
     private Map<Product,Integer>products;
+    private String fullAddress;
 
 
-    public Order(String orderID, Map<Product, Integer> products, String addressOrLockerNum, String status, Driver driver, Customer customer) {
+    public Order(String orderID, Map<Product, Integer> products, String addressOrLockerNum, String status, Driver driver, Customer customer,String fullAddress) {
         this.orderID = orderID;
         this.products = products;
         this.addressOrLockerNum = addressOrLockerNum;
         this.status = status;
         this.driver = driver;
         this.customer = customer;
+        this.fullAddress = fullAddress;
     }
 
     public String getOrderID() {
@@ -66,6 +68,14 @@ public class Order {
         this.products = products;
     }
 
+    public String getFullAddress() {
+        return fullAddress;
+    }
+
+    public void setFullAddress(String fullAddress) {
+        this.fullAddress = fullAddress;
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -75,6 +85,7 @@ public class Order {
                 ", status='" + status + '\'' +
                 ", addressOrLockerNum='" + addressOrLockerNum + '\'' +
                 ", products=" + products +
+                ", fullAddress='" + fullAddress + '\'' +
                 '}';
     }
 }
