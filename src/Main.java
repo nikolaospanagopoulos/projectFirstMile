@@ -58,10 +58,10 @@ public class Main {
 
             switch (choice) {
                 case 1:
-                    // registerNewOrderFromInput();
+                    registerNewOrderFromUserInput();
                     break;
                 case 2:
-                    //  updateOrderFromInput();
+                    updateOrderForCustomer();
                     break;
                 case 3:
                     // searchOrderFromInput();
@@ -86,12 +86,11 @@ public class Main {
             System.out.println("\nDelivery Management System");
             System.out.println("1. Register New Order");
             System.out.println("2. Update Order");
-            System.out.println("3. Search Order");
-            System.out.println("4. Generate Driver Report");
-            System.out.println("5. Register Product");
-            System.out.println("6. Register Driver");
-            System.out.println("7. Register Locker");
-            System.out.println("8. Exit");
+            System.out.println("3. Generate Driver Report");
+            System.out.println("4. Register Product");
+            System.out.println("5. Register Driver");
+            System.out.println("6. Register Locker");
+            System.out.println("7. Exit");
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -102,16 +101,13 @@ public class Main {
                 case 2:
                     updateOrderForAdmin();
                     break;
-                case 3:
-                    searchOrderFromInput();
-                    break;
-                case 6:
+                case 5:
                     registerDriver();
                     break;
-                case 5:
+                case 4:
                     registerProduct();
                     break;
-                case 8:
+                case 7:
                     running = false;
                     break;
                 default:
@@ -120,33 +116,114 @@ public class Main {
         }
     }
 
-    public static void searchOrderFromInput(){
-        System.out.println("Enter Order ID or Customer Name to search: ");
-        String criteria  = scanner.nextLine();
-        searchOrder(criteria);
-    }
 
+    private static Order selectOrderForAdmin(){
+        System.out.println("Available orders");
+        for(int i=0;i<orders.size();i++){
+            System.out.println(i+". "+orders.get(i).getOrderID());
+        }
+        System.out.println("Enter order id to update: ");
+        String orderID = scanner.nextLine();
+        Order toUpdate = null;
+
+        for(int i=0;i<orders.size();i++){
+            if(orders.get(i).getOrderID().equals(orderID)){
+                toUpdate = orders.get(i);
+            }
+        }
+
+        if(toUpdate==null){
+            System.out.println("Order not found with: "+orderID);
+            return null;
+        }
+        return toUpdate;
+    }
 
     public static void updateOrderForAdmin(){
-        System.out.println("Please enter order id to update: ");
-        Order foundOrder = searchOrder(scanner.nextLine());
-        if(foundOrder==null){
-            System.out.println("Order not found with the given information");
-            return;
-        }
-        System.out.println("  Update driver  ");
-        System.out.println("Current driver "+foundOrder.getDriver().getName());
-        Driver newDriver = selectDriver();
-        foundOrder.setDriver(newDriver);
+         Order foundOrder = selectOrderForAdmin();
+         if(foundOrder==null){
+             return;
+         }
+         Driver newDriver = selectDriver();
+         foundOrder.setDriver(newDriver);
+        System.out.println("Updated order successfully, new driver is "+newDriver.getName()+" "+newDriver.getSurname());
         System.out.println(foundOrder);
+
     }
 
+    private static void updateOrderForCustomer(){
+        System.out.println("Enter your Order ID or your full name  to find your order: ");
+        String criteria  = scanner.nextLine();
+        Order foundOrderToUpdate = searchOrder(criteria);
+        if(foundOrderToUpdate == null){
+            System.out.println("Order not found with your search query: "+criteria);
+            return;
+        }
+        System.out.println(foundOrderToUpdate);
+        System.out.println("Would you like to\n 1.update the delivery address \n 2.set the order as completed?");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice){
+            case 1:
+                updateDeliveryAddress(foundOrderToUpdate);
+                break;
+            case 2:
+                setOrderAsCompleted(foundOrderToUpdate);
+                break;
+
+        }
+    }
+    private static void updateDeliveryAddress(Order toUpdate){
+        if(toUpdate.getAddressOrLockerNum().startsWith("Locker")){
+            System.out.println("You have chosen delivery to locker method, you cannot change delivery address");
+            return;
+        }
+        System.out.println("Enter new delivery address: ");
+        String newAddress = scanner.nextLine();
+        toUpdate.setAddressOrLockerNum(newAddress);
+        System.out.println("Delivery address changed successfully");
+        System.out.println(toUpdate);
+    }
+
+    private static void setOrderAsCompleted(Order toUpdate){
+        if(toUpdate.getStatus().equalsIgnoreCase("completed")){
+            System.out.println("Your order is already completed");
+            return;
+        }
+
+        if(toUpdate.getAddressOrLockerNum().startsWith("Locker")){
+            System.out.println("hereeeeee");
+            String lockerAddress=toUpdate.getAddressOrLockerNum().split(" at ")[1].split(" #")[0];
+            System.out.println("Locker address "+lockerAddress);
+            int lockerNum = Integer.parseInt(toUpdate.getAddressOrLockerNum().split("#")[1]);
+            System.out.println("Locker number "+lockerNum);
+            Locker foundLocker = null;
+            for(int i = 0;i<lockers.size();i++){
+                if(lockers.get(i).getAddress().equals(lockerAddress)&&lockers.get(i).getNumber()==lockerNum){
+                    foundLocker = lockers.get(i);
+                }
+            }
+            if(foundLocker==null){
+                System.out.println("Something went wrong with the locker. Please contact administrator");
+                return;
+            }
+            foundLocker.setAvailable(true);
+            System.out.println(foundLocker);
+        }
+
+
+        toUpdate.setStatus("completed");
+        System.out.println("Your order was completed successfully");
+        System.out.println(toUpdate);
+    }
 
     private static Order searchOrder(String criteria){
 
         Order foundOrder = null;
         for(int i = 0;i<orders.size();i++){
-            if(orders.get(i).getOrderID().equals(criteria)||orders.get(i).getCustomer().getName().equals(criteria)){
+            if(orders.get(i).getOrderID().equals(criteria)|| (orders.get(i).getCustomer().getName()+" "+orders.get(i).getCustomer().getSurname()).equalsIgnoreCase(criteria)
+
+            ){
                 foundOrder = orders.get(i);
             }
         }
@@ -258,7 +335,7 @@ public class Main {
                 return;
             }
             deliveryAddress = "Locker at "+available.getAddress() + " #"+available.getNumber();
-            System.out.println("!!!!!!!!!"+deliveryAddress);
+
             available.setAvailable(false);
         }else{
             deliveryAddress = customer.getAddress();
