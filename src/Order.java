@@ -8,6 +8,7 @@ public class Order {
     private String addressOrLockerNum;
     private Map<Product,Integer>products;
     private String fullAddress;
+    private int rating;
 
 
     public Order(String orderID, Map<Product, Integer> products, String addressOrLockerNum, String status, Driver driver, Customer customer,String fullAddress) {
@@ -18,6 +19,7 @@ public class Order {
         this.driver = driver;
         this.customer = customer;
         this.fullAddress = fullAddress;
+        this.rating = 0;
     }
 
     public String getOrderID() {
@@ -76,6 +78,14 @@ public class Order {
         this.fullAddress = fullAddress;
     }
 
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -86,6 +96,7 @@ public class Order {
                 ", addressOrLockerNum='" + addressOrLockerNum + '\'' +
                 ", products=" + products +
                 ", fullAddress='" + fullAddress + '\'' +
+                ", rating=" + rating +
                 '}';
     }
 }

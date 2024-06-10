@@ -1,3 +1,4 @@
+import java.sql.Array;
 import java.sql.SQLOutput;
 import java.util.*;
 
@@ -67,7 +68,7 @@ public class Main {
                     // searchOrderFromInput();
                     break;
                 case 4:
-                    //    rateDeliveryService();
+                    rateDeliveryService();
                     break;
                 case 5:
                     running = false;
@@ -77,6 +78,7 @@ public class Main {
             }
         }
     }
+
 
 
 
@@ -100,6 +102,9 @@ public class Main {
                     break;
                 case 2:
                     updateOrderForAdmin();
+                    break;
+                case 3:
+                    generateDriverReport();
                     break;
                 case 5:
                     registerDriver();
@@ -192,11 +197,8 @@ public class Main {
         }
 
         if(toUpdate.getAddressOrLockerNum().startsWith("Locker")){
-            System.out.println("hereeeeee");
             String lockerAddress=toUpdate.getAddressOrLockerNum().split(" at ")[1].split(" #")[0];
-            System.out.println("Locker address "+lockerAddress);
             int lockerNum = Integer.parseInt(toUpdate.getAddressOrLockerNum().split("#")[1]);
-            System.out.println("Locker number "+lockerNum);
             Locker foundLocker = null;
             for(int i = 0;i<lockers.size();i++){
                 if(lockers.get(i).getAddress().equals(lockerAddress)&&lockers.get(i).getNumber()==lockerNum){
@@ -208,13 +210,16 @@ public class Main {
                 return;
             }
             foundLocker.setAvailable(true);
-            System.out.println(foundLocker);
+
         }
 
 
         toUpdate.setStatus("completed");
+        System.out.println("Order code: "+toUpdate.getOrderID());
+        System.out.println("Driver's full name: "+toUpdate.getDriver().getName()+" "+toUpdate.getDriver().getSurname());
+        System.out.println("Delivery address: "+toUpdate.getFullAddress());
+        System.out.println("Order status: "+toUpdate.getStatus());
         System.out.println("Your order was completed successfully");
-        System.out.println(toUpdate);
     }
 
     private static Order searchOrder(String criteria){
@@ -430,9 +435,44 @@ public class Main {
 
 
 
+private static void rateDeliveryService(){
+    System.out.println("Enter order id to rate:");
+    String OrderId = scanner.nextLine();
+    Order foundOrder = null;
+    for (int i = 0;i<orders.size();i++){
+        if(orders.get(i).getOrderID().equals(OrderId)){
+            foundOrder = orders.get(i);
+        }
+    }
+    if(foundOrder==null){
+        System.out.println("Order with id: "+OrderId+" not found");
+        return;
+    }
+    if(!foundOrder.getStatus().equalsIgnoreCase("completed")){
+        System.out.println("Order with id: "+OrderId+" hasn't been completed yet");
+        return;
+    }
+    System.out.println("Enter rating (1-10)");
+    int rating = scanner.nextInt();
+    scanner.nextLine();
+    if(rating<1||rating>10){
+        System.out.println("Invalid rating. Please select a number between 1 and 10");
+        return;
+    }
+    foundOrder.setRating(rating);
+    System.out.println("Rating submitted successfully");
+}
+
+public static void generateDriverReport(){
+    List<Driver>driversFound = new ArrayList<>();
+    for(int i = 0;i<orders.size();i++){
+        if(!driversFound.contains(orders.get(i).getDriver())){
+            driversFound.add(orders.get(i).getDriver());
+        }
+    }
 
 
-
+}
 
 
 
