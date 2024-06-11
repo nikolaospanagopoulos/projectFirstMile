@@ -1,3 +1,4 @@
+import java.util.List;
 import java.util.Map;
 
 public class Order {
@@ -6,12 +7,12 @@ public class Order {
     private Driver driver;
     private String status;
     private String addressOrLockerNum;
-    private Map<Product,Integer>products;
+    private List<ProductInformation> products;
     private String fullAddress;
     private int rating;
 
 
-    public Order(String orderID, Map<Product, Integer> products, String addressOrLockerNum, String status, Driver driver, Customer customer,String fullAddress) {
+    public Order(String orderID, List<ProductInformation> products, String addressOrLockerNum, String status, Driver driver, Customer customer,String fullAddress) {
         this.orderID = orderID;
         this.products = products;
         this.addressOrLockerNum = addressOrLockerNum;
@@ -62,11 +63,11 @@ public class Order {
         this.status = status;
     }
 
-    public Map<Product, Integer> getProducts() {
+    public List<ProductInformation> getProducts() {
         return products;
     }
 
-    public void setProducts(Map<Product, Integer> products) {
+    public void setProducts(List<ProductInformation> products) {
         this.products = products;
     }
 
