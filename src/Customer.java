@@ -1,8 +1,8 @@
 public class Customer {
-    private String name;
-    private String surname;
-    private String address;
-    private String email;
+    public String name;
+    public String surname;
+    public String address;
+    public String email;
 
     public Customer(String email, String address, String surname, String name) {
         this.email = email;

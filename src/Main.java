@@ -66,6 +66,7 @@ public class Main {
                     updateOrderForCustomer();
                     break;
                 case 3:
+                    //TODO
                     // searchOrderFromInput();
                     break;
                 case 4:
@@ -85,7 +86,6 @@ public class Main {
         while (running) {
             System.out.println("\nGenerate Reports");
             System.out.println("1. Total Orders and Quantities by Barcode or Category");
-            //TODO: check this later
             System.out.println("2. Total Orders by Driver and Delivery Location");
             System.out.println("3. Average Delivery Service Rating");
             System.out.println("4. Back to Administrator Menu");
@@ -100,12 +100,63 @@ public class Main {
                 case 2:
                     generateDriverReport();
                     break;
+                case 3:
+                    generateRatingReport();
                 case 4:
                     running = false;
                     break;
                 default:
                     System.out.println("Invalid choice, try again");
             }
+        }
+
+    }
+    public static void generateRatingReport(){
+        List<Integer>ratings = new ArrayList<>();
+        for(int i=0;i<orders.size();i++){
+            ratings.add(orders.get(i).getRating());
+        }
+        if(ratings.isEmpty()){
+            System.out.println("No ratings available");
+            return;
+        }
+        double average=0.0;
+        for(int i=0;i<ratings.size();i++){
+            average+=ratings.get(i);
+        }
+        average /=ratings.size();
+        int highestRating = ratings.get(0);
+        int lowestRating =ratings.get(0);
+        for(int i=1;i<ratings.size();i++){
+            if(ratings.get(i)>highestRating){
+                highestRating = ratings.get(i);
+            }
+        }
+        for(int i=1;i<ratings.size();i++){
+            if(ratings.get(i)<lowestRating){
+                lowestRating = ratings.get(i);
+            }
+        }
+        System.out.println("Lowest rating: "+lowestRating);
+        System.out.println("Heighest rating: "+highestRating);
+        System.out.println("Average rating: "+average);
+        List<Customer>customersWithHighestRating= new ArrayList<>();
+        List<Customer>customersWithLowestRating= new ArrayList<>();
+        for(int i=0;i<orders.size();i++){
+            if(orders.get(i).getRating()==highestRating){
+                customersWithHighestRating.add(orders.get(i).getCustomer());
+            }
+            if(orders.get(i).getRating()==lowestRating){
+                customersWithLowestRating.add(orders.get(i).getCustomer());
+            }
+        }
+        System.out.println("Customers that gave the lowerst rating: ");
+        for(int i=0;i<customersWithLowestRating.size();i++){
+            System.out.println("customer name: "+customersWithLowestRating.get(i).getName()+" "+customersWithLowestRating.get(i).getSurname());
+        }
+        System.out.println("Customers that gave the heighest rating: ");
+        for(int i=0;i<customersWithHighestRating.size();i++){
+            System.out.println("customer name: "+customersWithHighestRating.get(i).getName()+" "+customersWithHighestRating.get(i).getSurname());
         }
 
     }
@@ -144,8 +195,9 @@ public class Main {
             System.out.println("3. Generate Reports");
             System.out.println("4. Register Product");
             System.out.println("5. Register Driver");
-            System.out.println("6. Search Order");
-            System.out.println("7. Exit");
+            System.out.println("6. Register Locker");
+            System.out.println("7. Search Order");
+            System.out.println("8. Exit");
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -167,16 +219,32 @@ public class Main {
                     registerDriver();
                     break;
                 case 6:
+                    registerLocker();
+                    break;
+                case 7:
                     searchOrderForAdmin();
                     break;
-
-                case 7:
+                case 8:
                     running = false;
                     break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
             }
         }
+    }
+
+
+    private static void registerLocker(){
+        System.out.println("Registering locker. Enter data: ");
+        System.out.println("Enter locker address");
+        String lockerAddress = scanner.nextLine();
+        System.out.println("Enter locker number");
+        int lockerNumber = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Is the locker available? (yes/no) ");
+        boolean isLockerAvailable = scanner.nextLine().equalsIgnoreCase("yes");
+        Locker createdLocker = new Locker(isLockerAvailable,lockerNumber,lockerAddress);
+        lockers.add(createdLocker);
     }
 
     private static void searchOrderForAdmin() {
@@ -366,7 +434,7 @@ public class Main {
 
         String productName = scanner.nextLine();
 
-        System.out.println("enter peoduct brand: ");
+        System.out.println("enter product brand: ");
 
         String productBrand = scanner.nextLine();
 
@@ -386,7 +454,6 @@ public class Main {
         System.out.print("Deliver to locker? (yes/no): ");
         scanner.nextLine();
         boolean deliverToLocker = scanner.nextLine().equalsIgnoreCase("yes");
-        System.out.println("DELIVERS TO LOCKER" + deliverToLocker);
         registerNewOrder(customer, driver, products, deliverToLocker);
     }
 
@@ -439,8 +506,20 @@ public class Main {
             for (int i = 0; i < customers.size(); i++) {
                 System.out.println((i + 1) + ". " + customers.get(i).getName() + " " + customers.get(i).getSurname());
             }
-            System.out.print("Enter customer number (or 0 to create new customer): ");
-            int customerIndex = scanner.nextInt() - 1;
+
+            int number = 0;
+            boolean validInput =false;
+            while(!validInput){
+                System.out.print("Enter customer number (or 0 to create new customer): ");
+                try{
+                    number= scanner.nextInt();
+                    validInput=true;
+                }catch (InputMismatchException e){
+                    System.out.println("Invalid input. Please enter a valid number");
+                    scanner.next();
+                }
+            }
+            int customerIndex = number -1;
             scanner.nextLine();
             if (customerIndex == -1) {
                 return createCustomer();
@@ -460,7 +539,22 @@ public class Main {
                 System.out.println((i + 1) + ". " + drivers.get(i).getName() + " " + drivers.get(i).getSurname());
             }
             System.out.print("Enter driver number (or 0 to create new driver): ");
-            int driverIndex = scanner.nextInt() - 1;
+
+
+            int number = 0;
+            boolean validInput =false;
+            while(!validInput){
+                System.out.print("Enter driver number (or 0 to create new driver): ");
+                try{
+                    number= scanner.nextInt();
+                    validInput=true;
+                }catch (InputMismatchException e){
+                    System.out.println("Invalid input. Please enter a valid number");
+                    scanner.next();
+                }
+            }
+
+            int driverIndex = number - 1;
             scanner.nextLine();
             if (driverIndex == -1) {
                 return registerDriver();
@@ -476,7 +570,7 @@ public class Main {
         List<ProductInformation> productsSelected = new ArrayList<>();
         System.out.println("Select Products:");
         for (int i = 0; i < products.size(); i++) {
-            System.out.println((i + 1) + ". " + products.get(i).getName() + " (" + products.get(i).getCategory() + ")");
+            System.out.println((i + 1) + ". Barcode: " +products.get(i).getBarcode()+", Name: "+ products.get(i).getName() + ", category: (" + products.get(i).getCategory() + ")");
         }
         while (true) {
             System.out.print("Enter product number (or 0 to finish): ");
