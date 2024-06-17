@@ -8,18 +8,18 @@ public class Order {
     private String status;
     private String addressOrLockerNum;
     private List<ProductInformation> products;
-    private String fullAddress;
+
     private int rating;
 
 
-    public Order(String orderID, List<ProductInformation> products, String addressOrLockerNum, String status, Driver driver, Customer customer,String fullAddress) {
+    public Order(String orderID, List<ProductInformation> products, String addressOrLockerNum, String status, Driver driver, Customer customer) {
         this.orderID = orderID;
         this.products = products;
         this.addressOrLockerNum = addressOrLockerNum;
         this.status = status;
         this.driver = driver;
         this.customer = customer;
-        this.fullAddress = fullAddress;
+
         this.rating = 0;
     }
 
@@ -71,13 +71,7 @@ public class Order {
         this.products = products;
     }
 
-    public String getFullAddress() {
-        return fullAddress;
-    }
 
-    public void setFullAddress(String fullAddress) {
-        this.fullAddress = fullAddress;
-    }
 
     public int getRating() {
         return rating;
@@ -96,7 +90,6 @@ public class Order {
                 ", status='" + status + '\'' +
                 ", addressOrLockerNum='" + addressOrLockerNum + '\'' +
                 ", products=" + products +
-                ", fullAddress='" + fullAddress + '\'' +
                 ", rating=" + rating +
                 '}';
     }
