@@ -10,10 +10,12 @@ public class Main {
     final private static List<Locker> lockers = new ArrayList<>();
     final private static Scanner scanner = new Scanner(System.in);
 
+
     public static int checkForNumberInput() {
         int choice = 0;
         while (true) {
             System.out.print("Enter your choice: ");
+            //check if given input is number
             try {
                 choice = scanner.nextInt();
                 scanner.nextLine();
@@ -24,8 +26,23 @@ public class Main {
             }
         }
     }
-
+    public static int checkForNumberInput(String question) {
+        int choice = 0;
+        while (true) {
+            System.out.print(question);
+            //check if given input is number
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+                return choice;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid number");
+                scanner.next();
+            }
+        }
+    }
     public static void main(String[] args) {
+        //initialize test data
         initProducts();
         initCustomers();
         initDrivers();
@@ -119,8 +136,9 @@ public class Main {
     public static void generateRatingReport() {
         List<Integer> ratings = new ArrayList<>();
         int totalRating = 0;
+        //add all ratings and check if final rating is > 0
         for (int i = 0; i < orders.size(); i++) {
-            if(orders.get(i).getRating()!=0){
+            if (orders.get(i).getRating() != 0) {
                 ratings.add(orders.get(i).getRating());
                 totalRating += orders.get(i).getRating();
             }
@@ -134,6 +152,7 @@ public class Main {
         for (int i = 0; i < ratings.size(); i++) {
             average += ratings.get(i);
         }
+        //find average rating
         average /= ratings.size();
         int highestRating = ratings.get(0);
         int lowestRating = ratings.get(0);
@@ -153,14 +172,17 @@ public class Main {
         List<Customer> customersWithHighestRating = new ArrayList<>();
         List<Customer> customersWithLowestRating = new ArrayList<>();
         for (int i = 0; i < orders.size(); i++) {
+            //find the customers that gave highest ratings
             if (orders.get(i).getRating() == highestRating) {
                 customersWithHighestRating.add(orders.get(i).getCustomer());
             }
             if (orders.get(i).getRating() == lowestRating) {
+                //find the customers that gave lowest ratings
                 customersWithLowestRating.add(orders.get(i).getCustomer());
             }
         }
         System.out.println("Customers that gave the lowest rating: ");
+        //print customers data
         for (int i = 0; i < customersWithLowestRating.size(); i++) {
             System.out.println("customer name: " + customersWithLowestRating.get(i).getName() + " " + customersWithLowestRating.get(i).getSurname());
         }
@@ -178,13 +200,16 @@ public class Main {
         for (int i = 0; i < orders.size(); i++) {
             Order order = orders.get(i);
             for (int j = 0; j < order.getProducts().size(); j++) {
+                //get products(quantity,barcode) from order
                 ProductInformation productInformation = order.getProducts().get(j);
                 int quantity = productInformation.getProductQuantity();
                 String barcode = productInformation.getProduct().getBarcode();
                 int index = barcodes.indexOf(barcode);
                 if (index != -1) {
+                    //add the quantity to already set barcode
                     quantitiesByBarcodes.set(index, quantitiesByBarcodes.get(index) + quantity);
                 } else {
+                    //if barcode doesn't exist we add it
                     barcodes.add(barcode);
                     quantitiesByBarcodes.add(quantity);
                 }
@@ -248,13 +273,13 @@ public class Main {
         System.out.println("Registering locker. Enter data: ");
         System.out.println("Enter locker address: ");
         String lockerAddress = scanner.nextLine();
-        System.out.println("Enter locker number: ");
-        int lockerNumber = scanner.nextInt();
-        scanner.nextLine();
+        int lockerNumber = checkForNumberInput("Enter locker number: ");
         System.out.println("Is the locker available? (yes/no) ");
+        //check if user wrote yes
         boolean isLockerAvailable = scanner.nextLine().equalsIgnoreCase("yes");
         Locker createdLocker = new Locker(isLockerAvailable, lockerNumber, lockerAddress);
         lockers.add(createdLocker);
+
     }
 
 
@@ -263,6 +288,7 @@ public class Main {
         String criteria = scanner.nextLine();
         Order found = searchOrder(criteria);
         if (found == null) {
+            //show error if not found order
             System.out.println("Order not found with criteria: " + criteria);
             return;
         }
@@ -272,6 +298,7 @@ public class Main {
 
         Order foundOrder = null;
         for (int i = 0; i < orders.size(); i++) {
+            //find order with orderId or customer full name
             if (orders.get(i).getOrderID().equals(criteria) || (orders.get(i).getCustomer().getName() + " " + orders.get(i).getCustomer().getSurname()).equalsIgnoreCase(criteria)
 
             ) {
@@ -280,6 +307,7 @@ public class Main {
         }
 
         if (foundOrder == null) {
+            //return null to show error in the calling function
             return null;
         }
         System.out.println("OrderId: " + foundOrder.getOrderID());
@@ -311,13 +339,12 @@ public class Main {
         System.out.println("Enter order id to update: ");
         String orderID = scanner.nextLine();
         Order toUpdate = null;
-
         for (int i = 0; i < orders.size(); i++) {
+            //find order by order ID
             if (orders.get(i).getOrderID().equals(orderID)) {
                 toUpdate = orders.get(i);
             }
         }
-
         if (toUpdate == null) {
             System.out.println("Order not found with: " + orderID);
             return null;
@@ -328,6 +355,8 @@ public class Main {
     public static void updateOrderForAdmin() {
         Order foundOrder = selectOrderForAdmin();
         if (foundOrder == null) {
+            //show error msg if order not found
+            System.out.println("Order not found");
             return;
         }
         Driver newDriver = selectDriver();
@@ -342,6 +371,7 @@ public class Main {
         String criteria = scanner.nextLine();
         Order foundOrderToUpdate = searchOrder(criteria);
         if (foundOrderToUpdate == null) {
+            //show error msg if order not found
             System.out.println("Order not found with your search query: " + criteria);
             return;
         }
@@ -383,6 +413,7 @@ public class Main {
             int lockerNum = Integer.parseInt(toUpdate.getAddressOrLockerNum().split("#")[1]);
             Locker foundLocker = null;
             for (int i = 0; i < lockers.size(); i++) {
+                //find locker with locker address and locker num
                 if (lockers.get(i).getAddress().equals(lockerAddress) && lockers.get(i).getNumber() == lockerNum) {
                     foundLocker = lockers.get(i);
                 }
@@ -391,11 +422,9 @@ public class Main {
                 System.out.println("Something went wrong with the locker. Please contact administrator");
                 return;
             }
+            //make it available if order is complete
             foundLocker.setAvailable(true);
-
         }
-
-
         toUpdate.setStatus("completed");
         System.out.println("Order code: " + toUpdate.getOrderID());
         System.out.println("Driver's full name: " + toUpdate.getDriver().getName() + " " + toUpdate.getDriver().getSurname());
@@ -466,10 +495,12 @@ public class Main {
         String customerFullName = scanner.nextLine();
         Customer foundCustomer = null;
         for (int i = 0; i < customers.size(); i++) {
+            //check if customer has an account already
             if ((customers.get(i).getName() + " " + customers.get(i).getSurname()).equalsIgnoreCase(customerFullName)) {
                 foundCustomer = customers.get(i);
             }
         }
+        //if customer doesn't have account , create it
         if (foundCustomer == null) {
             System.out.println("Customer with full name: " + customerFullName + " not found. Enter your data to register");
             System.out.println("Enter your first name: ");
@@ -489,6 +520,7 @@ public class Main {
 
         System.out.print("Deliver to locker? (yes/no): ");
         scanner.nextLine();
+
         boolean deliverToLocker = scanner.nextLine().equalsIgnoreCase("yes");
 
         registerNewOrder(foundCustomer, driver, products, deliverToLocker);
@@ -508,6 +540,7 @@ public class Main {
     }
 
     public static void registerNewOrder(Customer customer, Driver driver, List<ProductInformation> products, boolean deliversToLocker) {
+        //generate random number
         String orderId = UUID.randomUUID().toString();
         String deliveryAddress;
         if (deliversToLocker) {
@@ -518,22 +551,22 @@ public class Main {
                 }
             }
             if (available == null) {
-                System.out.println("no available locker, please try again later");
+                System.out.println("None of our lockers are available, please try again later");
                 return;
             }
             deliveryAddress = "Locker at " + available.getAddress() + " #" + available.getNumber();
-
+            //make locker not available
             available.setAvailable(false);
         } else {
             deliveryAddress = customer.getAddress();
         }
         Order newOrder = new Order(orderId, products, deliveryAddress, "pending", driver, customer);
 
-        System.out.println("Order id: "+newOrder.getOrderID());
-        System.out.println("Customer full name: "+newOrder.getCustomer().getName()+" "+newOrder.getCustomer().getSurname());
-        System.out.println("Driver full name: "+newOrder.getDriver().getName()+" "+newOrder.getDriver().getSurname());
-        if(newOrder.getAddressOrLockerNum().contains("Locker")){
-            System.out.println("Locker address: "+newOrder.getAddressOrLockerNum());
+        System.out.println("Order id: " + newOrder.getOrderID());
+        System.out.println("Customer full name: " + newOrder.getCustomer().getName() + " " + newOrder.getCustomer().getSurname());
+        System.out.println("Driver full name: " + newOrder.getDriver().getName() + " " + newOrder.getDriver().getSurname());
+        if (newOrder.getAddressOrLockerNum().contains("Locker")) {
+            System.out.println("Locker address: " + newOrder.getAddressOrLockerNum());
         }
         orders.add(newOrder);
         System.out.println("Order registered successfully");
@@ -560,6 +593,7 @@ public class Main {
         while (true) {
             System.out.println("Select Customer:");
             for (int i = 0; i < customers.size(); i++) {
+                //select with name and surname
                 System.out.println((i + 1) + ". " + customers.get(i).getName() + " " + customers.get(i).getSurname());
             }
 
@@ -591,6 +625,7 @@ public class Main {
         while (true) {
             System.out.println("Select Driver:");
             for (int i = 0; i < drivers.size(); i++) {
+                //select with name and surname
                 System.out.println((i + 1) + ". " + drivers.get(i).getName() + " " + drivers.get(i).getSurname());
             }
             int number = 0;
@@ -621,6 +656,7 @@ public class Main {
         while (true) {
             System.out.println("Select Driver:");
             for (int i = 0; i < drivers.size(); i++) {
+                //select with name and surname
                 System.out.println((i + 1) + ". " + drivers.get(i).getName() + " " + drivers.get(i).getSurname());
             }
             int number = 0;
@@ -639,6 +675,7 @@ public class Main {
             int driverIndex = number - 1;
             scanner.nextLine();
             if (driverIndex == -1) {
+                //create driver choice
                 return registerDriver();
             } else if (driverIndex >= 0 && driverIndex < drivers.size()) {
                 return drivers.get(driverIndex);
@@ -655,9 +692,19 @@ public class Main {
             System.out.println((i + 1) + ". Barcode: " + products.get(i).getBarcode() + ", Name: " + products.get(i).getName() + ", category: (" + products.get(i).getCategory() + ")");
         }
         while (true) {
-            System.out.print("Enter product number (or 0 to finish): ");
-            int productIndex = scanner.nextInt() - 1;
-            if (productIndex == -1) {
+            int productIndex = 0;
+            while (true) {
+                System.out.print("Enter product number (or 0 to finish): ");
+                try {
+                    productIndex = scanner.nextInt();
+                    break;
+                } catch (InputMismatchException e) {
+                    System.out.println("Invalid input. Please enter a valid number");
+                    scanner.next();
+                }
+            }
+            //check if user typed 0
+            if (productIndex - 1 == -1) {
                 System.out.println("finished adding products");
                 break;
             }
@@ -666,6 +713,7 @@ public class Main {
                 while (!validInput) {
                     System.out.print("Enter right quantity: ");
                     try {
+                        //check for valid user input
                         int quantity = scanner.nextInt();
                         scanner.nextLine();
                         productsSelected.add(new ProductInformation(products.get(productIndex), quantity));
@@ -688,6 +736,7 @@ public class Main {
         String OrderId = scanner.nextLine();
         Order foundOrder = null;
         for (int i = 0; i < orders.size(); i++) {
+            //find order with order id
             if (orders.get(i).getOrderID().equals(OrderId)) {
                 foundOrder = orders.get(i);
             }
@@ -721,6 +770,7 @@ public class Main {
             int customerLocationDeliveries = 0;
             int pendingOrders = 0;
             int completedOrders = 0;
+            //show data for each driver
             for (int j = 0; j < orders.size(); j++) {
                 Order order = orders.get(j);
                 if (order.getDriver().equals(driver)) {
